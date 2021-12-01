@@ -2,8 +2,9 @@ const express = require('express');
 
 const router = express.Router();
 
-const {authorController, blogController} = require('../controllers');
-const {authorAuth} = require('../middlewares')
+const authorController = require('../controllers/authorController');
+const blogController = require('../controllers/blogController')
+const authorAuth = require('../middlewares/authorAuth')
 // Author routes
 router.post('/authors', authorController.registerAuthor);
 router.post('/login', authorController.loginAuthor);

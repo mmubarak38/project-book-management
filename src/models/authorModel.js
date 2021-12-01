@@ -1,8 +1,5 @@
 const mongoose = require('mongoose')
 
-const {validator} = require('../utils')
-const {systemConfig} = require('../configs')
-
 const authorSchema = new mongoose.Schema({
     fname: {
         type: String,
@@ -16,7 +13,7 @@ const authorSchema = new mongoose.Schema({
     },
     title: {
         type: String,
-        enum: systemConfig.titleEnumArray,
+        enum: ['Mr', 'Mrs', 'Miss', 'Mast'],
         required: 'Title is required',
     },
     email: {
@@ -25,8 +22,11 @@ const authorSchema = new mongoose.Schema({
         lowercase: true,
         unique: true,
         required: 'Email address is required',
-        validate: {validator: validator.validateEmail, message: 'Please fill a valid email address', isAsync: false},
-        match: [validator.emailRegex, 'Please fill a valid email address']
+        validate: {
+            validator: function (email) {
+                return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
+            }, message: 'Please fill a valid email address', isAsync: false
+        }
     },
     password: {
         type: String,

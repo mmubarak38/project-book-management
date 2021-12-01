@@ -1,15 +1,27 @@
 const mongoose = require('mongoose')
 const ObjectId = mongoose.Types.ObjectId
+const authorModel = require('../models/authorModel')
+const blogModel = require('../models/blogModel')
 
-const {validator} = require('../utils')
-const {systemConfig} = require('../configs')
-const {authorModel, blogModel} = require('../models')
+const isValid = function(value) {
+    if(typeof value === 'undefined' || value === null) return false
+    if(typeof value === 'string' && value.trim().length === 0) return false
+    return true;
+}
+
+const isValidRequestBody = function(requestBody) {
+    return Object.keys(requestBody).length > 0
+}
+
+const isValidObjectId = function(objectId) {
+    return mongoose.Types.ObjectId.isValid(objectId)
+}
 
 const createBlog = async function (req, res) {
     try {
         const requestBody = req.body;
 
-        if(!validator.isValidRequestBody(requestBody)) {
+        if(!isValidRequestBody(requestBody)) {
             res.status(400).send({status: false, message: 'Invalid request parameters. Please provide blog details'})
             return
         }
@@ -18,32 +30,27 @@ const createBlog = async function (req, res) {
         const {title, body, authorId, tags, category, subcategory, isPublished} = requestBody;
         
         // Validation starts
-        if(!validator.isValid(title)) {
+        if(!isValid(title)) {
             res.status(400).send({status: false, message: 'Blog Title is required'})
             return
         }
 
-        if(!validator.isValid(body)) {
+        if(!isValid(body)) {
             res.status(400).send({status: false, message: 'Blog body is required'})
             return
         }
-        
-        if(!validator.isValid(authorId)) {
+
+        if(!isValid(authorId)) {
             res.status(400).send({status: false, message: 'Author id is required'})
             return
         }
 
-        if(!validator.isValid(authorId)) {
-            res.status(400).send({status: false, message: 'Author id is required'})
-            return
-        }
-
-        if(!validator.isValidObjectId(authorId)) {
+        if(!isValidObjectId(authorId)) {
             res.status(400).send({status: false, message: `${authorId} is not a valid author id`})
             return
         }
 
-        if(!validator.isValid(category)) {
+        if(!isValid(category)) {
             res.status(400).send({status: false, message: 'Blog category is required'})
             return
         }
@@ -66,19 +73,19 @@ const createBlog = async function (req, res) {
         }
 
         if(tags) {
-            if(validator.isArray(tags)) {
+            if(Array.isArray(tags)) {
                 blogData['tags'] = [...tags]
             }
-            if(validator.isValidString(tags)) {
+            if(Object.prototype.toString.call(tags) === "[object String]") {
                 blogData['tags'] = [ tags ]
             }
         }
 
         if(subcategory) {
-            if(validator.isArray(subcategory)) {
+            if(Array.isArray(subcategory)) {
                 blogData['subcategory'] = [...subcategory]
             }
-            if(validator.isValidString(subcategory)) {
+            if(Object.prototype.toString.call(subcategory) === "[object String]") {
                 blogData['subcategory'] = [ subcategory ]
             }
         }
@@ -96,23 +103,23 @@ const listBlog = async function (req, res) {
         const filterQuery = {isDeleted: false, deletedAt: null, isPublished: true}
         const queryParams = req.query
 
-        if(validator.isValidRequestBody(queryParams)) {
+        if(isValidRequestBody(queryParams)) {
             const {authorId, category, tags, subcategory} = queryParams
 
-            if(validator.isValid(authorId) && validator.isValidObjectId(authorId)) {
+            if(isValid(authorId) && isValidObjectId(authorId)) {
                 filterQuery['authorId'] = authorId
             }
 
-            if(validator.isValid(category)) {
+            if(isValid(category)) {
                 filterQuery['category'] = category.trim()
             }
 
-            if(validator.isValid(tags)) {
+            if(isValid(tags)) {
                 const tagsArr = tags.trim().split(',').map(tag => tag.trim());
                 filterQuery['tags'] = {$all: tagsArr}
             }
             
-            if(validator.isValid(subcategory)) {
+            if(isValid(subcategory)) {
                 const subcatArr = subcategory.trim().split(',').map(subcat => subcat.trim());
                 filterQuery['subcategory'] = {$all: subcatArr}
             }
@@ -120,7 +127,7 @@ const listBlog = async function (req, res) {
 
         const blogs = await blogModel.find(filterQuery)
         
-        if(Array.isArray(blogs) && blogs.length === 0) {
+        if(Array.isArray(blogs) && blogs.length===0) {
             res.status(404).send({status: false, message: 'No blogs found'})
             return
         }
@@ -139,12 +146,12 @@ const updateBlog = async function (req, res) {
         const authorIdFromToken = req.authorId
         
         // Validation stats
-        if(!validator.isValidObjectId(blogId)) {
+        if(!isValidObjectId(blogId)) {
             res.status(400).send({status: false, message: `${blogId} is not a valid blog id`})
             return
         }
 
-        if(!validator.isValidObjectId(authorIdFromToken)) {
+        if(!isValidObjectId(authorIdFromToken)) {
             res.status(400).send({status: false, message: `${authorIdFromToken} is not a valid token id`})
             return
         }
@@ -161,7 +168,7 @@ const updateBlog = async function (req, res) {
             return
         }
 
-        if(!validator.isValidRequestBody(requestBody)) {
+        if(!isValidRequestBody(requestBody)) {
             res.status(200).send({status: true, message: 'No paramateres passed. Blog unmodified', data: blog})
             return
         }
@@ -171,19 +178,19 @@ const updateBlog = async function (req, res) {
 
         const updatedBlogData = {}
 
-        if(validator.isValid(title)) {
+        if(isValid(title)) {
             if(!Object.prototype.hasOwnProperty.call(updatedBlogData, '$set')) updatedBlogData['$set'] = {}
 
             updatedBlogData['$set']['title'] = title
         }
 
-        if(validator.isValid(body)) {
+        if(isValid(body)) {
             if(!Object.prototype.hasOwnProperty.call(updatedBlogData, '$set')) updatedBlogData['$set'] = {}
 
             updatedBlogData['$set']['body'] = body
         }
 
-        if(validator.isValid(category)) {
+        if(isValid(category)) {
             if(!Object.prototype.hasOwnProperty.call(updatedBlogData, '$set')) updatedBlogData['$set'] = {}
 
             updatedBlogData['$set']['category'] = category
@@ -199,20 +206,20 @@ const updateBlog = async function (req, res) {
         if(tags) {
             if(!Object.prototype.hasOwnProperty.call(updatedBlogData, '$addToSet')) updatedBlogData['$addToSet'] = {}
             
-            if(validator.isArray(tags)) {
+            if(Array.isArray(tags)) {
                 updatedBlogData['$addToSet']['tags'] = { $each: [...tags]}
             }
-            if(validator.isValidString(tags)) {
+            if(typeof tags === "string") {
                 updatedBlogData['$addToSet']['tags'] = tags
             }
         }
 
         if(subcategory) {
             if(!Object.prototype.hasOwnProperty.call(updatedBlogData, '$addToSet')) updatedBlogData['$addToSet'] = {}
-            if(validator.isArray(subcategory)) {
+            if(Array.isArray(subcategory)) {
                 updatedBlogData['$addToSet']['subcategory'] = { $each: [...subcategory]}
             }
-            if(validator.isValidString(subcategory)) {
+            if(typeof subcategory === "string") {
                 updatedBlogData['$addToSet']['subcategory'] = subcategory
             }
         }
@@ -231,24 +238,19 @@ const deleteBlogByID = async function (req, res) {
         const blogId = params.blogId
         const authorIdFromToken = req.authorId
 
-        if(!validator.isValidObjectId(blogId)) {
+        if(!isValidObjectId(blogId)) {
             res.status(400).send({status: false, message: `${blogId} is not a valid blog id`})
         }
 
-        if(!validator.isValidObjectId(authorIdFromToken)) {
+        if(!isValidObjectId(authorIdFromToken)) {
             res.status(400).send({status: false, message: `${authorIdFromToken} is not a valid token id`})
         }
 
         const blog = await blogModel.findOne({_id: blogId, isDeleted: false, deletedAt: null })
-        // const blog = await blogModel.findOne({_id: blogId})
 
         if(!blog) {
             res.status(404).send({status: false, message: `Blog not found`})
         }
-
-        // if(blog.isDeleted && deletedAt !== null) {
-        //     res.status(404).send({status: false, message: `Blog is already deleted.`}) 
-        // }
 
         if(blog.authorId.toString() !== authorIdFromToken) {
             res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
@@ -267,43 +269,43 @@ const deleteBlogByParams = async function (req, res) {
         const queryParams = req.query
         const authorIdFromToken = req.authorId
 
-        if(!validator.isValidObjectId(authorIdFromToken)) {
+        if(!isValidObjectId(authorIdFromToken)) {
             res.status(400).send({status: false, message: `${authorIdFromToken} is not a valid token id`})
             return
         }
 
-        if(!validator.isValidRequestBody(queryParams)) {
+        if(!isValidRequestBody(queryParams)) {
             res.status(400).send({status: false, message: `No query params received. Aborting delete operation`})
             return
         }
 
         const {authorId, category, tags, subcategory, isPublished} = queryParams
 
-        if(validator.isValid(authorId) && validator.isValidObjectId(authorId)) {
+        if(isValid(authorId) && isValidObjectId(authorId)) {
             filterQuery['authorId'] = authorId
         }
 
-        if(validator.isValid(category)) {
+        if(isValid(category)) {
             filterQuery['category'] = category.trim()
         }
 
-        if(validator.isValid(isPublished)) {
+        if(isValid(isPublished)) {
             filterQuery['isPublished'] = isPublished
         }
 
-        if(validator.isValid(tags)) {
+        if(isValid(tags)) {
             const tagsArr = tags.trim().split(',').map(tag => tag.trim());
             filterQuery['tags'] = {$all: tagsArr}
         }
         
-        if(validator.isValid(subcategory)) {
+        if(isValid(subcategory)) {
             const subcatArr = subcategory.trim().split(',').map(subcat => subcat.trim());
             filterQuery['subcategory'] = {$all: subcatArr}
         }
 
         const blogs = await blogModel.find(filterQuery);
 
-        if(Array.isArray(blogs) && blogs.length === 0) {
+        if(Array.isArray(blogs) && blogs.length===0) {
             res.status(404).send({status: false, message: 'No matching blogs found'})
         }
 

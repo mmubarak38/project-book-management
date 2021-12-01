@@ -1,11 +1,24 @@
-const {validator, jwt} = require('../utils')
-const {systemConfig} = require('../configs')
-const {authorModel} = require('../models')
+const authorModel = require('../models/authorModel')
+const jwt = require('jsonwebtoken')
+
+const isValid = function(value) {
+    if(typeof value === 'undefined' || value === null) return false
+    if(typeof value === 'string' && value.trim().length === 0) return false
+    return true;
+}
+
+const isValidTitle = function(title) {
+    return ['Mr', 'Mrs', 'Miss', 'Mast'].indexOf(title) !== -1
+}
+
+const isValidRequestBody = function(requestBody) {
+    return Object.keys(requestBody).length > 0
+}
 
 const registerAuthor = async function (req, res) {
     try {
         const requestBody = req.body;
-        if(!validator.isValidRequestBody(requestBody)) {
+        if(!isValidRequestBody(requestBody)) {
             res.status(400).send({status: false, message: 'Invalid request parameters. Please provide author details'})
             return
         }
@@ -14,37 +27,37 @@ const registerAuthor = async function (req, res) {
         const {fname, lname, title, email, password} = requestBody; // Object destructing
 
         // Validation starts
-        if(!validator.isValid(fname)) {
+        if(!isValid(fname)) {
             res.status(400).send({status: false, message: 'First name is required'})
             return
         }
 
-        if(!validator.isValid(lname)) {
+        if(!isValid(lname)) {
             res.status(400).send({status: false, message: 'Last name is required'})
             return
         }
 
-        if(!validator.isValid(title)) {
+        if(!isValid(title)) {
             res.status(400).send({status: false, message: 'Title is required'})
             return
         }
         
-        if(!validator.isValidTitle(title)) {
-            res.status(400).send({status: false, message: `Title should be among ${systemConfig.titleEnumArray.join(', ')}`})
+        if(!isValidTitle(title)) {
+            res.status(400).send({status: false, message: `Title should be among Mr, Mrs, Miss and Mast`})
             return
         }
 
-        if(!validator.isValid(email)) {
+        if(!isValid(email)) {
             res.status(400).send({status: false, message: `Email is required`})
             return
         }
         
-        if(!validator.validateEmail(email)) {
+        if(!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))) {
             res.status(400).send({status: false, message: `Email should be a valid email address`})
             return
         }
 
-        if(!validator.isValid(password)) {
+        if(!isValid(password)) {
             res.status(400).send({status: false, message: `Password is required`})
             return
         }
@@ -69,7 +82,7 @@ const registerAuthor = async function (req, res) {
 const loginAuthor = async function (req, res) {
     try {
         const requestBody = req.body;
-        if(!validator.isValidRequestBody(requestBody)) {
+        if(!isValidRequestBody(requestBody)) {
             res.status(400).send({status: false, message: 'Invalid request parameters. Please provide login details'})
             return
         }
@@ -78,17 +91,17 @@ const loginAuthor = async function (req, res) {
         const {email, password} = requestBody;
         
         // Validation starts
-        if(!validator.isValid(email)) {
+        if(!isValid(email)) {
             res.status(400).send({status: false, message: `Email is required`})
             return
         }
         
-        if(!validator.validateEmail(email)) {
+        if(!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))) {
             res.status(400).send({status: false, message: `Email should be a valid email address`})
             return
         }
 
-        if(!validator.isValid(password)) {
+        if(!isValid(password)) {
             res.status(400).send({status: false, message: `Password is required`})
             return
         }
@@ -101,7 +114,11 @@ const loginAuthor = async function (req, res) {
             return
         }
 
-        const token = await jwt.createToken({authorId: author._id});
+        const token = await jwt.sign({
+            authorId: author._id,
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 10*60*60
+        }, 'someverysecuredprivatekey291@(*#*(@(@()')
 
         res.header('x-api-key', token);
         res.status(200).send({status: true, message: `Author login successfull`, data: {token}});

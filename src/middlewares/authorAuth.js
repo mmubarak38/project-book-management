@@ -1,4 +1,4 @@
-const {jwt} = require('../utils')
+const jwt = require('jsonwebtoken')
 
 const autherAuth = async (req, res, next) => {
     try {
@@ -8,7 +8,7 @@ const autherAuth = async (req, res, next) => {
             return;
         }
 
-        const decoded = await jwt.verifyToken(token);
+        const decoded = await jwt.verify(token, 'someverysecuredprivatekey291@(*#*(@(@()')
 
         if(!decoded) {
             res.status(403).send({status: false, message: `Invalid authentication token in request`})
