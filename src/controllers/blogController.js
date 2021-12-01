@@ -240,20 +240,24 @@ const deleteBlogByID = async function (req, res) {
 
         if(!isValidObjectId(blogId)) {
             res.status(400).send({status: false, message: `${blogId} is not a valid blog id`})
+            return
         }
 
         if(!isValidObjectId(authorIdFromToken)) {
             res.status(400).send({status: false, message: `${authorIdFromToken} is not a valid token id`})
+            return
         }
 
         const blog = await blogModel.findOne({_id: blogId, isDeleted: false, deletedAt: null })
 
         if(!blog) {
             res.status(404).send({status: false, message: `Blog not found`})
+            return
         }
 
         if(blog.authorId.toString() !== authorIdFromToken) {
             res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
+            return
         }
 
         await blogModel.findOneAndUpdate({_id: blogId}, {$set: {isDeleted: true, deletedAt: new Date()}})
@@ -307,6 +311,7 @@ const deleteBlogByParams = async function (req, res) {
 
         if(Array.isArray(blogs) && blogs.length===0) {
             res.status(404).send({status: false, message: 'No matching blogs found'})
+            return
         }
 
         const idsOfBlogsToDelete = blogs.map(blog => {
@@ -315,6 +320,7 @@ const deleteBlogByParams = async function (req, res) {
 
         if(idsOfBlogsToDelete.length === 0) {
             res.status(404).send({status: false, message: 'No blogs found'})
+            return
         }
 
         await blogModel.updateMany({_id: {$in: idsOfBlogsToDelete}}, {$set: {isDeleted: true, deletedAt: new Date()}})
