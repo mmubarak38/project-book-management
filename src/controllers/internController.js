@@ -115,4 +115,9 @@ const registerIntern = async function (req, res) {
     }
 }
 
+
+
+
+
+
 module.exports.registerIntern = registerIntern;
