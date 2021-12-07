@@ -40,10 +40,16 @@ const createCollege = async function (req, res) {
             res.status(400).send({ status: false, message: 'fullName is required' })
             return
         }
+        if (!isValid(logoLink)){
+            res.status(400).send({ status: false, message: ' logo is required' })
+        return
+            
+        }
         if (!ValidURL(logoLink)) {
-            res.status(400).send({ status: false, message: 'logolink is required' })
+            res.status(400).send({ status: false, message: 'Invalid logo input' })
             return
         }
+       
 
 
 
@@ -85,29 +91,52 @@ const getAllIntern = async function (req, res) {
             res.status(400).send({ status: false, msg: 'college name not present' })
         }
 
+        console.log(collegeDetail._id)
 
-        let internDetail = await internModel.find({ collegeId: collegeDetail._id }).select({ _id: 1, name: 1, email: 1, mobile: 1 })
-        // console.log( internDetail)
-        if (internDetail.length===0) {
-            return res.status(400).send({ status: false, msg: 'intern Details not present' })
-        }
+        let internDetail = await internModel.find({ collegeId: collegeDetail._id, isDeleted: false }).select({ _id: 1, name: 1, email: 1, mobile: 1 })
+        
+        console.log(internDetail)
+
+
+
 
         let result = {
             name: collegeDetail.name,
             FullName: collegeDetail.fullName,
             LogoLink: collegeDetail.logoLink,
+
+        }
+
+
+        // if (internDetail.length === 0) {
+        //     return res.status(201).send({ status: true, result, msg: 'intern Details not present' })
+        // }
+
+        let result2 = {
+            name: collegeDetail.name,
+            FullName: collegeDetail.fullName,
+            LogoLink: collegeDetail.logoLink,
             interests: internDetail
         }
-        if (!result) {
-            res.status(400).send({ status: false, msg: 'data is not present' })
-        }
-        //  console.log(result)
 
-        res.status(200).send(result)
+
+        // if (!result2) {
+        //     res.status(400).send({ status: false, msg: 'data is not present' })
+        // }
+       
+        
+        if (internDetail.length === 0) {
+            return res.status(201).send({ status: true, result, msg: 'intern Details not present' })
+        }else{
+            res.status(201).send({status: true, data: result2})
+        }
+
+        
     } catch (error) {
-        res.status(500).send({ status: false, msg: 'some thing went wrong' })
+        res.status(500).send({ status: false, msg: error.message })
     }
 }
+
 
 
 module.exports.createCollege = createCollege;

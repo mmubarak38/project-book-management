@@ -65,7 +65,12 @@ const registerIntern = async function (req, res) {
             return
         }
               // mobile validation ends
-              
+
+              // collegeId is required
+              if(!isValid(collegeId)) {
+                res.status(400).send({status: false, message: 'collegeId is required'})
+                return
+            }    
               
               // college Id cheking starts
         if(!isValidObjectId(collegeId)) {
