@@ -2,8 +2,7 @@ const mongoose = require('mongoose')
 const userSchema = new mongoose.Schema({
     title: {
         type: String,
-        trim:true,
-        enum: ['Mr', 'Mrs', 'Miss', 'Mast'],
+        enum: ['Mr', 'Mrs', 'Miss'],
         required: 'Title is required',
     },
     name: {
@@ -43,4 +42,4 @@ const userSchema = new mongoose.Schema({
         pincode: String
       },
 }, { timestamps: true })
-module.exports = mongoose.model('User', userSchema, 'users')
+module.exports = mongoose.model('User', userSchema)

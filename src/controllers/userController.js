@@ -28,13 +28,13 @@ const isValidPassword = function (value ) {
 }
 const registerUser = async function (req, res) {
     try {
-        const requestBody = req.body;
+        let requestBody = req.body;
         if(!isValidRequestBody(requestBody)) {
             res.status(400).send({status: false, message: 'Invalid request parameters. Please provide author details'})
             return
         }
         // Extract params
-        const {title , name,  phone, email, password, address} = requestBody; // Object destructing
+        let {title , name,  phone, email, password, address} = requestBody; // Object destructing
         // Validation starts
         
         if(!isValid(title)) {
@@ -42,21 +42,25 @@ const registerUser = async function (req, res) {
             return
         }
        
-
+        title = title.trim()
         if(!isValidTitle(title)) {
-            res.status(400).send({status: false, message: `Title should be among Mr, Mrs, Miss and Mast`})
+
+            res.status(400).send({status: false, message: `Title should be among Mr, Mrs, Miss`})
             return
         }
+        
+
         if(!isValid(name)) {
             res.status(400).send({status: false, message: ' name is required'})
             return
         }
-        
+        name= name.trim()
 
         if (!isValidphone(phone, 'number')) {
             res.status(400).send({ status: false, message: "phone number is required" })
             return
         }
+    
         //mobile number validation
         if (!(/^\d{10}$/.test(phone))) {
             res.status(400).send({ status: false, message: `phone number  should be a valid` })
@@ -66,6 +70,7 @@ const registerUser = async function (req, res) {
             res.status(400).send({status: false, message: `Email is required`})
             return
         }
+        email = email.trim()
         if(!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))) {
             res.status(400).send({status: false, message: `Email should be a valid email address`})
             return
@@ -74,6 +79,8 @@ const registerUser = async function (req, res) {
             res.status(400).send({status: false, message: `Password is required`})
             return
         }
+        password = password.trim()
+        
         if(!isValidPassword(password)){
             res.status(400).send({status: false, message: `Password must contain characters between 8 to 15`})
             return
