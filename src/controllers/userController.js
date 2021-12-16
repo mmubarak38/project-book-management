@@ -1,4 +1,8 @@
 const userModel = require('../models/userModel')
+const jwt = require('jsonwebtoken')
+
+
+
 const isValid = function(value) {
     if(typeof value === 'undefined' || value === null) return false
     if(typeof value === 'string' && value.trim().length === 0) return false
@@ -80,7 +84,7 @@ const registerUser = async function (req, res) {
             return
         }
         password = password.trim()
-        
+
         if(!isValidPassword(password)){
             res.status(400).send({status: false, message: `Password must contain characters between 8 to 15`})
             return
@@ -103,6 +107,47 @@ const registerUser = async function (req, res) {
         res.status(500).send({status: false, message: error.message});
     }
 }
-module.exports = {
-    registerUser
-}
+
+
+const loginUser=async function(req,res){
+    try {
+           let requestBody = req.body;
+           if(!isValidRequestBody(requestBody)) {
+               res.status(400).send({status: false, message: 'Invalid request parameters. Please provide login details'})
+               return
+           }
+           // Extract params
+           let {email, password} = requestBody;
+           // Validation starts
+           if(!isValid(email)) {
+               res.status(400).send({status: false, message: `Email is required`})
+               return
+           }
+           email = email.trim()
+
+           if(!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))) {
+               res.status(400).send({status: false, message: `Email should be a valid email address`})
+               return
+           }
+           if(!isValid(password)) {
+               res.status(400).send({status: false, message: `Password is required`})
+               return
+           }
+           password = password.trim()
+           // Validation ends
+           const user = await userModel.findOne({email, password});
+           if(!user) {
+               res.status(401).send({status: false, message: `Invalid login credentials`});
+               return
+           }
+           const token = await jwt.sign({userId: user._id}, 'radium',{
+               expiresIn:"120S"
+           })
+           res.header('x-api-key', token);
+           res.status(200).send({status: true, message: `user login successfull`, data: {token}});
+       } catch (error) {
+           res.status(500).send({status: false, message: error.message});
+       }
+   }
+
+   module.exports = {registerUser, loginUser}
