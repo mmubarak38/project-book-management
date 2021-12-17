@@ -140,7 +140,7 @@ const loginUser=async function(req,res){
                res.status(401).send({status: false, message: `Invalid login credentials`});
                return
            }
-           const token = await jwt.sign({userId: user._id}, 'radium',{
+           const token = await jwt.sign({userId: user._id}, 'project4',{
                expiresIn:"120S"
            })
            res.header('x-api-key', token);

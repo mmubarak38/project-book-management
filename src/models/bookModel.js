@@ -8,7 +8,7 @@ const bookSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
-    excerpt: {
+    excerpt: {     //small summary or tag line
         type: String,
         required: true,
         trim: true
