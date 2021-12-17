@@ -77,11 +77,46 @@ const createBook = async function (req, res) {
         }
         // validation ends here
         const reviews = 0;
-        const boodDetails = { title, excerpt, userId, ISBN, category, subcategory, reviews, releasedAt }
-        const ceatedBook = await bookModel.create(boodDetails)
+        const bookDetails = { title, excerpt, userId, ISBN, category, subcategory, reviews, releasedAt }
+        const ceatedBook = await bookModel.create(bookDetails)
         return res.status(201).send({ status: true, message: "book successfully created", data: ceatedBook })
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }
 }
-module.exports = { createBook }
+
+
+const getBooks=async function(req,res){
+    try{
+         const queryParams=req.query
+        let filterQuery={isDeleted:false,deletedAt:null}
+        let {userId, category,subcategory}=queryParams
+            if (userId) {
+                filterQuery["userId"] = userId
+            }
+            if (category) {
+                filterQuery["category"] = category
+            }
+            if (subcategory) {
+                filterQuery["subcategory"] = subcategory
+            }
+            let book = await bookModel.find(filterQuery)
+            const book1 = await bookModel.find(filterQuery).select({ "_id": 1, "title": 1, "excerpt": 1, "userId": 1 ,"category":1,"releasedAt":1,"reviews":1 })
+            function SortArray(x, y){
+                if (x.title < y.title) {return -1;}
+                if (x.title > y.title) {return 1;}
+                return 0;
+            }
+            var book2 = book1.sort(SortArray);
+            if (book.length > 0) {
+              res.status(200).send({ status: true,message:'Books list', data: book2 })
+            }
+            else {
+              res.status(404).send({ msg: "book not find" })
+            }
+    }catch(error){
+        res.status(500).send({status:true,message:error.message})
+    }
+}
+
+module.exports = { createBook ,getBooks}
