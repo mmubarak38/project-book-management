@@ -1,35 +1,40 @@
 const mongoose = require('mongoose')
 
-const blogSchema = new mongoose.Schema({
+const bookSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: 'Blog title is required',
-        trim: true
+        required: 'Book title is required',
+        trim: true ,
+        unique:true
     },
 
     excerpt: {
         type: String,
-        required: true
+        required: true,
+        trim:true
     },
 
     userId: {
-        required: 'Blog user is required',
-        type: mongoose.Types.ObjectId, refs: 'User'
+        required: 'Book user is required',
+        type: mongoose.Types.ObjectId, 
+        refs: 'User'
     },
 
     ISBN: {
         type: String,
         required: true,
-        unique: true
+        unique: true ,
+        trim:true
     },
     category: {
         type: String,
         trim: true,
-        required: 'Blog category is required'
+        required: 'Book category is required'
     },
     subcategory: {
         type: String,
-        required: true
+        required: true,
+        trim:true
     },
 
 
@@ -47,10 +52,10 @@ const blogSchema = new mongoose.Schema({
         default: false
     },
     releasedAt: {
-        type: Date,
+        type:Date,
         required: true,
     },
 
 }, { timestamps: true })
 
-module.exports = mongoose.model('Blog', blogSchema, 'blogs')
+module.exports = mongoose.model('Book', bookSchema)
