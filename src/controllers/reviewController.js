@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const reviewModel=require('../models/reviewModel')
 const bookModel = require('../models/bookModel')
-const { findOneAndUpdate } = require('../models/reviewModel')
+//const { findOneAndUpdate } = require('../models/reviewModel')
 
 
 const isValid = function(value) {
@@ -28,6 +28,7 @@ const isValidRating = function (value ) {
     }
     
 }
+//isValidRating= isValidRating.Math.ceil(value)
 
 
 const createReview= async function(req,res){
@@ -54,6 +55,7 @@ const createReview= async function(req,res){
         res.status(400).send({status: false, message: 'reviewedBy is required'})
         return
     }
+     reviewedAt= Date()
 
     // if(!isValid(reviewedAt)) {
     //     res.status(400).send({status: false, message: 'reviewedAt is required'})
@@ -84,10 +86,10 @@ const createReview= async function(req,res){
     }
 
     //review, rating, reviewer's name in request body.
-     const reviewData= {bookId,reviewedBy,reviewedAt:new Date(),rating,review}
+     const reviewData= {bookId,reviewedBy,reviewedAt,rating,review}
     const newReview = await reviewModel.create(reviewData);
     
-    const reviewId=newReview._id
+    //const reviewId=newReview._id
    const bookDetails= await bookModel.findOneAndUpdate({_id:bookId,},{reviews:book.reviews+1},{new:true})
    
    const revData = await reviewModel.find({bookId}).select({"_id":1, "bookId":1,"reviewedBy": 1,"reviewedAt": 1,"rating": 1,"review":1 })
@@ -145,6 +147,12 @@ const updateReview= async function(req,res){
         return
     }
 
+    if(!isValid(review)) {
+        res.status(400).send({status: false, message: 'review is required'})
+        return
+    }
+
+
     if(!isValid(reviewedBy)) {
         res.status(400).send({status: false, message: 'reviewedBy is required'})
         return
@@ -161,10 +169,6 @@ const updateReview= async function(req,res){
         return
     }
 
-    if(!isValid(review)) {
-        res.status(400).send({status: false, message: 'rating is required'})
-        return
-    }
 
 
     const book = await bookModel.findOne({_id:bookId, isDeleted:false, detetedAt:null});

@@ -10,7 +10,7 @@ const isValid = function(value) {
 }
 
 const isValidTitle = function(title) {
-    return ['Mr', 'Mrs', 'Miss', 'Mast'].indexOf(title) !== -1
+    return ['Mr', 'Mrs', 'Miss'].indexOf(title) !== -1
 }
 
 const isValidRequestBody = function(requestBody) {
@@ -43,7 +43,7 @@ const registerUser = async function (req, res) {
         }
 
         // Extract params
-        const {title , name,  phone, email, password, address} = requestBody; // Object destructing
+        let {title , name,  phone, email, password, address} = requestBody; // Object destructing
 
         // Validation starts
 
@@ -51,6 +51,7 @@ const registerUser = async function (req, res) {
             res.status(400).send({status: false, message: 'Title is required'})
             return
         }
+        title = title.trim()
         
         if(!isValidTitle(title)) {
             res.status(400).send({status: false, message: `Title should be among Mr, Mrs, Miss and Mast`})

@@ -123,8 +123,8 @@ const createBook = async function (req, res) {
             releasedAt
         }
     
-        const ceatedBook = await bookModel.create(bookData)
-        return res.status(201).send({status: true, message: 'New book created successfully', data: ceatedBook})
+        const createdBook = await bookModel.create(bookData)
+        return res.status(201).send({status: true, message: 'New book created successfully', data: createdBook})
     } 
     catch (error) {
         console.log(error)
@@ -206,7 +206,7 @@ const getBooksById = async function (req, res) {
 const updateBook = async function (req, res) {
     try {
         const _id = req.params.bookId
-        const requestBody = req.body
+        let requestBody = req.body
         const userIdFromToken=req.userId
 
         if (!isValidRequestBody(requestBody)) {
@@ -240,8 +240,9 @@ const updateBook = async function (req, res) {
                 res.status(400).send({ status: false, message: "Title should have some value" })
                 return
             }
+            //title = title.trim()
 
-            title = String.prototype.trim.call(title)
+           title = String.prototype.trim.call(title)
             let isTitleAlreadyUsed = await bookModel.findOne({ title })
 
             if (isTitleAlreadyUsed) {
@@ -250,14 +251,15 @@ const updateBook = async function (req, res) {
             }
             updateData['title'] = title
         }
-        if (excerpt) {
+        // if (excerpt) {
             if (!isValid(excerpt)) {
                 res.status(400).send({ status: false, message: "excerpt should have some value" })
                 return
             }
+            excerpt = excerpt.trim()
             updateData['excerpt'] = excerpt
-        }
-        if (ISBN) {
+        //}
+       // if (ISBN) {
 
             if (!isValid(ISBN)) {
                 res.status(400).send({ status: false, message: "ISBN should have some value" })
@@ -272,15 +274,15 @@ const updateBook = async function (req, res) {
                 return
             }
             updateData['ISBN'] = ISBN 
-        }
-        if (releasedAt) {
+        //}
+        //if (releasedAt) {
 
             if (!Date.parse(releasedAt)) {
                 res.status(400).send({ status: false, message: `releasedAt should be an date and format("YYYY-MM-DD")` })
                 return
             }
             updateData['releasedAt'] = releasedAt
-        }
+        //}
 
         if (!isValidRequestBody(updateData)) {
             res.status(400).send({ status: false, message: "Please provide correct updating data " })
