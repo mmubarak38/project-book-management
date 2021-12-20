@@ -54,7 +54,7 @@ const registerUser = async function (req, res) {
         title = title.trim()
         
         if(!isValidTitle(title)) {
-            res.status(400).send({status: false, message: `Title should be among Mr, Mrs, Miss and Mast`})
+            res.status(400).send({status: false, message: `Title should be among Mr, Mrs, Miss`})
             return
         }
 
