@@ -1,6 +1,4 @@
-
 const mongoose = require('mongoose')
-const ObjectId = mongoose.Types.ObjectId
 const userModel = require('../models/userModel')
 const bookModel = require('../models/bookModel')
 const reviewModel=require('../models/reviewModel')
@@ -18,6 +16,8 @@ const isValidRequestBody = function(requestBody) {
 const isValidObjectId = function(objectId) {
     return mongoose.Types.ObjectId.isValid(objectId)
 }
+
+
 const validateDate =function(value)
 {
 
@@ -47,16 +47,23 @@ const createBook = async function (req, res) {
         }
 
 
-       
-
         // Extract params
         const {title, excerpt, userId, ISBN, category, subcategory, releasedAt} = requestBody;
         
         // Validation starts
+
         if(!isValid(title)) {
             res.status(400).send({status: false, message: 'Book Title is required'})
             return
         }
+
+        const isTitleAlreadyUsed = await bookModel.findOne({title}); // {title:title}
+
+        if(isTitleAlreadyUsed) {
+            res.status(400).send({status: false, message: `${title} title is already registered`})
+            return
+        }
+
 
         if(!isValid(excerpt)) {
             res.status(400).send({status: false, message: 'excerpt is required'})
@@ -74,8 +81,26 @@ const createBook = async function (req, res) {
             return
         }
 
+        const user = await userModel.findById(userId);
+
+        if(!user) {
+            res.status(400).send({status: false, message: `user does not exit`})
+            return
+        }
+
+        if(userId !==userIdFromToken) {
+            res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
+            return
+        }
+
         if(!isValid(ISBN)) {
             res.status(400).send({status: false, message: 'Book ISBN is required'})
+            return
+        }
+
+        const isIsbnAlreadyUsed= await bookModel.findOne({ISBN})
+        if(isIsbnAlreadyUsed) {
+            res.status(400).send({status: false, message: `${ISBN} ISBN address is already registered`})
             return
         }
 
@@ -83,8 +108,9 @@ const createBook = async function (req, res) {
             res.status(400).send({status: false, message: 'Book category is required'})
             return
         }
+
         if(!isValid(subcategory)) {
-            res.status(400).send({status: false, message: 'Book category is required'})
+            res.status(400).send({status: false, message: ' subcategory is required'})
             return
         }
 
@@ -96,35 +122,8 @@ const createBook = async function (req, res) {
             res.status(400).send({status: false, message: 'releasedAt should be an date and format("YYYY-MM-DD")'})
             return
         }
-        // if (!Date.parse(releasedAt)) {
-        //     res.status(400).send({ status: false, message: `releasedAt should be an date and format("YYYY-MM-DD")` })
-        //     return
-        // }
-
-        if(userId !==userIdFromToken) {
-            res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
-            return
-        }
-
-        const isTitleAlreadyUsed = await bookModel.findOne({title}); // {title:title}
-
-        if(isTitleAlreadyUsed) {
-            res.status(400).send({status: false, message: `${title} title address is already registered`})
-            return
-        }
-
-        const isIsbnAlreadyUsed= await bookModel.findOne({ISBN})
-        if(isIsbnAlreadyUsed) {
-            res.status(400).send({status: false, message: `${ISBN} ISBN address is already registered`})
-            return
-        }
-
-        const user = await userModel.findById(userId);
-
-        if(!user) {
-            res.status(400).send({status: false, message: `user does not exit`})
-            return
-        }
+       
+        
         // Validation ends
         const reviews = 0;
        
@@ -201,6 +200,12 @@ const getBooksById = async function (req, res) {
 
     const _id = req.params.bookId
 
+    if(!isValid(_id)) {
+        res.status(400).send({status: false, message: 'bookId id is required'})
+        return
+    }
+
+
     if (!isValidObjectId(_id)) {
         res.status(400).send({ status: false, message: "bookId should be valid" })
         return
@@ -257,7 +262,7 @@ const updateBook = async function (req, res) {
                 res.status(400).send({ status: false, message: "Title should have some value" })
                 return
             }
-            //title = title.trim()
+      
 
            title = String.prototype.trim.call(title)
             let isTitleAlreadyUsed = await bookModel.findOne({ title })
@@ -268,16 +273,15 @@ const updateBook = async function (req, res) {
             }
             updateData['title'] = title
         }
-        // if (excerpt) {
+       
             if (!isValid(excerpt)) {
                 res.status(400).send({ status: false, message: "excerpt should have some value" })
                 return
             }
             excerpt = excerpt.trim()
             updateData['excerpt'] = excerpt
-        //}
-       // if (ISBN) {
 
+      
             if (!isValid(ISBN)) {
                 res.status(400).send({ status: false, message: "ISBN should have some value" })
                 return
@@ -291,15 +295,14 @@ const updateBook = async function (req, res) {
                 return
             }
             updateData['ISBN'] = ISBN 
-        //}
-        //if (releasedAt) {
 
-            if(!validateDate(releasedAt)){
-                res.status(400).send({status: false, message: 'releasedAt should be an date and format("YYYY-MM-DD")'})
+        
+            if (!Date.parse(releasedAt)) {
+                res.status(400).send({ status: false, message: `releasedAt should be an date and format("YYYY-MM-DD")` })
                 return
             }
             updateData['releasedAt'] = releasedAt
-        //}
+        
 
         if (!isValidRequestBody(updateData)) {
             res.status(400).send({ status: false, message: "Please provide correct updating data " })
@@ -315,8 +318,6 @@ const updateBook = async function (req, res) {
     }
 
 }
-
-
 
 
 const deleteBookByID = async function (req, res) {
@@ -353,9 +354,6 @@ const deleteBookByID = async function (req, res) {
         res.status(500).send({status: false, message: error.message});
     }
 }
-
-
-
 
 
 module.exports={createBook, getBooks, getBooksById,updateBook, deleteBookByID}

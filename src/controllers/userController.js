@@ -33,24 +33,26 @@ const isValidPassword = function (value) {
 
 }
 
-const trimObjValues= function(obj) {
+// mentor session
+
+const trimObjValues = function (obj) {
     return Object.keys(obj).reduce((acc, curr) => {
-      acc[curr] = obj[curr].trim()
-      return acc;
+        acc[curr] = obj[curr].trim()
+        return acc;
     }, {});
-  }
+}
 
 
 const registerUser = async function (req, res) {
     try {
         const requestBody = req.body;
         if (!isValidRequestBody(requestBody)) {
-            res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide author details' })
+            res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide user details' })
             return
         }
 
         // Extract params
-        let { title, name, phone, email, password, address, street, city, pincode } = requestBody; // Object destructing
+        let { title, name, phone, email, password, address } = requestBody; // Object destructing
 
         // Validation starts
 
@@ -74,9 +76,17 @@ const registerUser = async function (req, res) {
             res.status(400).send({ status: false, message: "phone number is required" })
             return
         }
+
         //mobile number validation
+
         if (!(/^\d{10}$/.test(phone))) {
             res.status(400).send({ status: false, message: `phone number  should be a valid` })
+            return
+        }
+
+        const isphoneAlreadyUsed = await userModel.findOne({ phone })
+        if (isphoneAlreadyUsed) {
+            res.status(400).send({ status: false, message: `this phone number ${phone} is already used, try another one` })
             return
         }
 
@@ -97,11 +107,6 @@ const registerUser = async function (req, res) {
             return
         }
 
-        const isphoneAlreadyUsed = await userModel.findOne({ phone })
-        if (isphoneAlreadyUsed) {
-            res.status(400).send({ status: false, message: "phone number is already used, try another one" })
-            return
-        }
 
         if (!isValid(password.trim())) {
             res.status(400).send({ status: false, message: `Password is required` })
@@ -112,33 +117,31 @@ const registerUser = async function (req, res) {
             res.status(400).send({ status: false, message: `Password must contain characters between 8 to 15` })
             return
         }
+
         if (!isValid(address)) {
-             res.status(400).send({ status: false, message: `address is mandatory` })
-             return
+            res.status(400).send({ status: false, message: `address is mandatory` })
+            return
         }
+
+        //ti trim object of Object
 
         trimObjValues(address)
 
-        
+
         if (!isValid(address.street)) {
             res.status(400).send({ status: false, message: "street should have some value" })
             return
         }
-        //street = address.street.trim()
-
 
         if (!isValid(address.city)) {
             res.status(400).send({ status: false, message: "city should have some value" })
             return
         }
-        //city = address.city.trim()
 
         if (!isValid(address.pincode)) {
             res.status(400).send({ status: false, message: "pincode should have some value" })
             return
         }
-        //pincode = address.pincode.trim()
-
 
         // Validation ends
 
@@ -204,8 +207,5 @@ const loginUser = async function (req, res) {
 }
 
 
-module.exports = {
-    registerUser, loginUser
-
-}
+module.exports = { registerUser, loginUser }
 
