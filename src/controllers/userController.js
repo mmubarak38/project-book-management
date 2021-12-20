@@ -43,8 +43,8 @@ const registerUser = async function (req, res) {
         }
 
         // Extract params
-        let { title, name, phone, email, password, address, street, city, pincode } = requestBody; // Object destructing
-
+        let { title, name, phone, email, password, address:{street, city, pincode} } = requestBody; // Object destructing
+        
         // Validation starts
 
         if (!isValid(title)) {
@@ -106,29 +106,29 @@ const registerUser = async function (req, res) {
             return
         }
         if (!isValid(address)) {
-            
 
-        
-        if (!isValid(address.street)) {
-            res.status(400).send({ status: false, message: "street should have some value" })
+
+
+            if (!isValid(address.street)) {
+                res.status(400).send({ status: false, message: "street should have some value" })
+                return
+            }
+            street = address.street.trim()
+
+
+            if (!isValid(address.city)) {
+                res.status(400).send({ status: false, message: "city should have some value" })
+                return
+            }
+            city = address.city.trim()
+
+            if (!isValid(address.pincode)) {
+                res.status(400).send({ status: false, message: "pincode should have some value" })
+                return
+            }
+            res.status(400).send({ status: false, message: `address is mandatory` })
             return
         }
-        street = address.street.trim()
-
-
-        if (!isValid(address.city)) {
-            res.status(400).send({ status: false, message: "city should have some value" })
-            return
-        }
-        city = address.city.trim()
-
-        if (!isValid(address.pincode)) {
-            res.status(400).send({ status: false, message: "pincode should have some value" })
-            return
-        }
-        res.status(400).send({ status: false, message: `address is mandatory` })
-            return
-    }
         pincode = address.pincode.trim()
 
 
