@@ -174,11 +174,12 @@ const getBooks=async function(req,res){
             let book = await bookModel.find(filterQuery)
             const book1 = await bookModel.find(filterQuery).select({ "_id": 1, "title": 1, "excerpt": 1, "userId": 1 ,"category":1,"releasedAt":1,"reviews":1 })
             
-            function SortArray(x, y){
+            function SortArray(x, y){         //discuss with mentor
                 if (x.title < y.title) {return -1;}
                 if (x.title > y.title) {return 1;}
                 return 0;
             }
+            
             var book2 = book1.sort(SortArray);
 	          
             if (book.length > 0) {

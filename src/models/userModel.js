@@ -40,9 +40,9 @@ const userSchema = new mongoose.Schema({
         required: 'Password is required'
     },
     address: {
-        street: String,
-        city: String,
-        pincode: String
+        street: {type:String ,trim: true},
+        city:{type:String, trim:true},
+        pincode:{ type:String, trim:true}
       },
 
 }, { timestamps: true })

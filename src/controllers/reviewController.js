@@ -54,11 +54,11 @@ const createReview= async function(req,res){
         return
     }
 
-    if(!isValid(reviewedBy)) {
-        res.status(400).send({status: false, message: 'reviewedBy is required'})
-        return
-    }
-     reviewedAt= Date()
+    // if(!isValid(reviewedBy)) {
+    //     res.status(400).send({status: false, message: 'reviewedBy is required'})
+    //     return
+    // }
+     reviewedAt= new Date();
 
     // if(!isValid(reviewedAt)) {
     //     res.status(400).send({status: false, message: 'reviewedAt is required'})
