@@ -28,6 +28,9 @@ const isValidRating = function (value ) {
     }
     
 }
+const isValidNumber=function(value){
+    return Number.isInteger(value)
+}
 //isValidRating= isValidRating.Math.ceil(value)
 
 
@@ -66,6 +69,11 @@ const createReview= async function(req,res){
         res.status(400).send({status: false, message: 'rating is required'})
         return
     }
+
+    if(!isValidNumber(rating)){
+        res.status(400).send({status: false, message: 'rating should not be in decimal'})
+        return
+   }
 
     if(!isValidRating(rating)){
         res.status(400).send({status: false, message: `you have to give rating between 1 to 5`})
@@ -163,6 +171,11 @@ const updateReview= async function(req,res){
         res.status(400).send({status: false, message: 'rating is required'})
         return
     }
+
+    if(!isValidNumber(rating)){
+        res.status(400).send({status: false, message: 'rating should not be in decimal'})
+        return
+   }
 
     if(!isValidRating(rating)){
         res.status(400).send({status: false, message: `you have to give rating between 1 to 5`})

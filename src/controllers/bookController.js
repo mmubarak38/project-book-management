@@ -18,6 +18,18 @@ const isValidRequestBody = function(requestBody) {
 const isValidObjectId = function(objectId) {
     return mongoose.Types.ObjectId.isValid(objectId)
 }
+const validateDate =function(value)
+{
+
+    var pattern = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/;
+    if (value == null || value == "" || !pattern.test(value)) {
+        //errMessage += "Invalid date of birth\n";
+        return false;
+    }
+    else {
+        return true
+    }
+}
 
 const createBook = async function (req, res) {
     try {
@@ -80,10 +92,14 @@ const createBook = async function (req, res) {
             res.status(400).send({status: false, message: 'Book released date is required'})
             return
         }
-        if (!Date.parse(releasedAt)) {
-            res.status(400).send({ status: false, message: `releasedAt should be an date and format("YYYY-MM-DD")` })
+        if(!validateDate(releasedAt)){
+            res.status(400).send({status: false, message: 'releasedAt should be an date and format("YYYY-MM-DD")'})
             return
         }
+        // if (!Date.parse(releasedAt)) {
+        //     res.status(400).send({ status: false, message: `releasedAt should be an date and format("YYYY-MM-DD")` })
+        //     return
+        // }
 
         if(userId !==userIdFromToken) {
             res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
@@ -277,8 +293,8 @@ const updateBook = async function (req, res) {
         //}
         //if (releasedAt) {
 
-            if (!Date.parse(releasedAt)) {
-                res.status(400).send({ status: false, message: `releasedAt should be an date and format("YYYY-MM-DD")` })
+            if(!validateDate(releasedAt)){
+                res.status(400).send({status: false, message: 'releasedAt should be an date and format("YYYY-MM-DD")'})
                 return
             }
             updateData['releasedAt'] = releasedAt
