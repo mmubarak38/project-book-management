@@ -31,7 +31,8 @@ const userSchema = new mongoose.Schema({
         validate: {
             validator: function (email) {
                 return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
-            }, message: 'Please fill a valid email address', isAsync: false
+            }, message: 'Please fill a valid email address', isAsync: false   //we are not waiting for third party call it is  internally handaling the code
+            
         }
     },
     password: {

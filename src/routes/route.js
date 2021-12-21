@@ -1,11 +1,14 @@
 const express = require('express');
 
 const router = express.Router();
-
+const awsController= require('../controllers/awsController')
 const userController = require('../controllers/userController');
 const bookController=require('../controllers/bookController')
 const reviewController=require('../controllers/reviewController')
 const midd=require('../middleWare/middleWare')
+
+// to create bookCover url
+router.post("/bookCoverUrl", awsController.bookCoverUrl);
 
 // user routes
 router.post('/register', userController.registerUser);

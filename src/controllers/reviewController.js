@@ -19,7 +19,7 @@ const isValidObjectId = function (objectId) {
 }
 
 const isValidRating = function (value) {
-    if (value < 1) {
+    if (value < 1) {         // always r
         return false
     } else if (value > 5) {
         return false

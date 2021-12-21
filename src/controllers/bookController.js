@@ -48,7 +48,7 @@ const createBook = async function (req, res) {
 
 
         // Extract params
-        const {title, excerpt, userId, ISBN, category, subcategory, releasedAt} = requestBody;
+        const {title,bookCover, excerpt, userId, ISBN, category, subcategory, releasedAt} = requestBody;
         
         // Validation starts
 
@@ -63,7 +63,10 @@ const createBook = async function (req, res) {
             res.status(400).send({status: false, message: `${title} title is already registered`})
             return
         }
-
+        if(!isValid(bookCover)) {
+            res.status(400).send({status: false, message: 'excerpt is required'})
+            return
+        }
 
         if(!isValid(excerpt)) {
             res.status(400).send({status: false, message: 'excerpt is required'})
@@ -129,6 +132,7 @@ const createBook = async function (req, res) {
        
         const bookData = {
             title, 
+            bookCover,
             excerpt, 
             userId, 
             ISBN, 
@@ -173,13 +177,13 @@ const getBooks=async function(req,res){
             let book = await bookModel.find(filterQuery)
             const book1 = await bookModel.find(filterQuery).select({ "_id": 1, "title": 1, "excerpt": 1, "userId": 1 ,"category":1,"releasedAt":1,"reviews":1 })
             
-            function SortArray(x, y){         //discuss with mentor
+            function SortArray(x, y){         //discuss with mentor // we can sort in mongodb also by using .sor(title)
                 if (x.title < y.title) {return -1;}
                 if (x.title > y.title) {return 1;}
                 return 0;
             }
             
-            var book2 = book1.sort(SortArray);
+            const book2 = book1.sort(SortArray);
 	          
             if (book.length > 0) {
               res.status(200).send({ status: true,message:'Books list', data: book2 })
@@ -247,8 +251,8 @@ const updateBook = async function (req, res) {
             res.status(404).send({ status: false, message: "No book found" })
             return
         }
-        let { title, excerpt, ISBN, releasedAt } = requestBody
-        let updateData = {}
+        const { title, excerpt, ISBN, releasedAt } = requestBody
+        const updateData = {}
 
 
         if (bookDetails.userId.toString() !== userIdFromToken) {
@@ -326,6 +330,11 @@ const deleteBookByID = async function (req, res) {
         const bookId = params.bookId
         const userIdFromToken = req.userId
 
+        if(Book.userId.toString() !== userIdFromToken) {
+            res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
+            return
+        }
+
         if(!isValidObjectId(bookId)) {
             res.status(400).send({status: false, message: `${bookId} is not a valid book id`})
             return
@@ -343,12 +352,8 @@ const deleteBookByID = async function (req, res) {
             return
         }
 
-        if(Book.userId.toString() !== userIdFromToken) {
-            res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
-            return
-        }
 
-        await bookModel.findOneAndUpdate({_id: bookId}, {$set: {isDeleted: true, deletedAt: new Date()}})
+     await bookModel.findOneAndUpdate({_id: bookId}, {$set: {isDeleted: true, deletedAt: new Date()}})
         res.status(200).send({status: true, message: `Book deleted successfully`})
     } catch (error) {
         res.status(500).send({status: false, message: error.message});

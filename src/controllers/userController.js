@@ -22,7 +22,7 @@ const isValidphone = function (value, type) {
     return true;
 }
 
-const isValidPassword = function (value) {
+const isValidPassword = function (value) {   //
     if (value.length < 8) {
         return false
     } else if (value.length > 15) {
@@ -30,8 +30,10 @@ const isValidPassword = function (value) {
     } else {
         return true
     }
-
 }
+
+//if(value.length<8 && value.length>15){rreturn true}
+
 
 // mentor session
 
