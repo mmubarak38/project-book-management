@@ -175,25 +175,23 @@ const getBooks=async function(req,res){
             }
 
             let book = await bookModel.find(filterQuery)
-            const book1 = await bookModel.find(filterQuery).select({ "_id": 1, "title": 1, "excerpt": 1, "userId": 1 ,"category":1,"releasedAt":1,"reviews":1 })
+            const book1 = await bookModel.find(filterQuery).select({ "_id": 1, "title": 1, "excerpt": 1, "userId": 1 ,"category":1,"releasedAt":1,"reviews":1 }).sort({"title":1})
+           
+            // function SortArray(x, y){                                            //discuss with mentor // we can sort in mongodb also by using .sor(title)
+            //     if (x.title < y.title) {return -1;}
+            //     if (x.title > y.title) {return 1;}
+            //     return 0;
+            // }
             
-            function SortArray(x, y){         //discuss with mentor // we can sort in mongodb also by using .sor(title)
-                if (x.title < y.title) {return -1;}
-                if (x.title > y.title) {return 1;}
-                return 0;
-            }
-            
-            const book2 = book1.sort(SortArray);
+            // const book2 = book1.sort(SortArray);
 	          
             if (book.length > 0) {
-              res.status(200).send({ status: true,message:'Books list', data: book2 })
+              res.status(200).send({ status: true,message:'Books list', data: book1 })
             }
             else {
               res.status(404).send({ msg: "book not find" })
             }
           
-
-
     }catch(error){
         res.status(500).send({status:true,message:error.message})
     }
@@ -251,8 +249,8 @@ const updateBook = async function (req, res) {
             res.status(404).send({ status: false, message: "No book found" })
             return
         }
-        const { title, excerpt, ISBN, releasedAt } = requestBody
-        const updateData = {}
+        let { title, excerpt, ISBN, releasedAt } = requestBody
+        let updateData = {}
 
 
         if (bookDetails.userId.toString() !== userIdFromToken) {
@@ -330,10 +328,7 @@ const deleteBookByID = async function (req, res) {
         const bookId = params.bookId
         const userIdFromToken = req.userId
 
-        if(Book.userId.toString() !== userIdFromToken) {
-            res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
-            return
-        }
+       
 
         if(!isValidObjectId(bookId)) {
             res.status(400).send({status: false, message: `${bookId} is not a valid book id`})
@@ -344,13 +339,18 @@ const deleteBookByID = async function (req, res) {
             res.status(400).send({status: false, message: `${userIdFromToken} is not a valid token id`})
             return
         }
-
+       
         const Book = await bookModel.findOne({_id: bookId, isDeleted: false, deletedAt: null })
 
         if(!Book) {
             res.status(404).send({status: false, message: `Book not found`})
             return
         }
+        if(Book.userId.toString() !== userIdFromToken) {
+            res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
+            return
+        }
+
 
 
      await bookModel.findOneAndUpdate({_id: bookId}, {$set: {isDeleted: true, deletedAt: new Date()}})

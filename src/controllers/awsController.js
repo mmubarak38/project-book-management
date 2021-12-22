@@ -1,4 +1,5 @@
 const aws = require("aws-sdk");
+const userModel = require("../models/userModel");
 
 aws.config.update({
   accessKeyId: "AKIAY3L35MCRRMC6253G",  // id
@@ -16,12 +17,12 @@ let uploadFile = async (file) => {
     var uploadParams = {
       ACL: "public-read", // this file is publically readable
       Bucket: "classroom-training-bucket", // HERE
-      Key: "Radium/mmubarak38/booktTitle/" + new Date()+file.originalname, // HERE    "pk_newFolder/harry-potter.png" pk_newFolder/harry-potter.png
+      Key: "Radium/mmubarak38/booktTitle/" + new Date() + file.originalname, // HERE    "pk_newFolder/harry-potter.png" pk_newFolder/harry-potter.png
       Body: file.buffer, 
     };
 
     // Callback - function provided as the second parameter ( most oftenly)
-    s3.upload(uploadParams , function (err, data) {
+     s3.upload(uploadParams , function (err, data) {
       if (err) {
         return reject( { "error": err });
       }
@@ -31,7 +32,6 @@ let uploadFile = async (file) => {
     });
   });
 };
-
 
 const bookCoverUrl= async function (req, res) {
   try {

@@ -22,20 +22,9 @@ const isValidphone = function (value, type) {
     return true;
 }
 
-const isValidPassword = function (value) {   //
-    if (value.length < 8) {
-        return false
-    } else if (value.length > 15) {
-        return false
-    } else {
-        return true
-    }
-}
+ const isValidPassword = function (value) { 
+    if(value.length>7 && value.length<16){return true} };
 
-//if(value.length<8 && value.length>15){rreturn true}
-
-
-// mentor session
 
 const trimObjValues = function (obj) {
     return Object.keys(obj).reduce((acc, curr) => {
@@ -163,11 +152,21 @@ const loginUser = async function (req, res) {
 
     try {
         const requestBody = req.body;
+        
+        if (!isValid(requestBody.email)) {
+            res.status(400).send({ status: false, message: 'email key is required' })
+            return
+        }
+        if (!isValid(requestBody.password)) {
+            res.status(400).send({ status: false, message: 'password key is required' })
+            return
+        }
+       
         if (!isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide login details' })
             return
         }
-
+      
         // Extract params
         const { email, password } = requestBody;
 
